@@ -1,11 +1,18 @@
 #include <cstring>
 #include <iostream>
 #include <netinet/in.h>
+#include <string>
 #include <sys/socket.h>
 #include <unistd.h>
 
 const int PORT = 8080;
 const int BUFFER_SIZE = 1024;
+
+void handle_hello_endpoint(int client_socket) {
+  const char *response =
+      "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello, World!";
+  send(client_socket, response, strlen(response), 0);
+}
 
 void handle(int client_socket) {
   char buffer[BUFFER_SIZE] = {0};
@@ -16,11 +23,13 @@ void handle(int client_socket) {
     return;
   }
 
-  // need to add a implementation here to handle the requests
-
-  const char *response =
-      "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello, World!";
-  send(client_socket, response, strlen(response), 0);
+  if (strstr(buffer, "GET /hello") != nullptr) {
+    handle_hello_endpoint(client_socket);
+  } else {
+    const char *response =
+        "HTTP/1.1 404 Not Found\r\nContent-Length: 13\r\n\r\n404 Not Found";
+    send(client_socket, response, strlen(response), 0);
+  }
 
   close(client_socket);
 }
