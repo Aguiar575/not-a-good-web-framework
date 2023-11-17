@@ -4,14 +4,17 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <unordered_map>
+#include <stdio.h>
+#include <string.h>
 
 class HttpHandler {
 public:
   HttpHandler(int port) : port(port) {}
 
   void setEndpointHandler(const std::string &path,
-                          std::function<void(int)> handler) {
-    endpointHandlers[path] = handler;
+                          const std::string &message) {
+    endpointHandlers[path] = create_endpoint_handler(message);
   }
 
   void start() {
@@ -57,7 +60,6 @@ private:
 
     std::string request(buffer);
 
-    // Extract the path from the request 
     size_t path_start = request.find(' ') + 1;
     size_t path_end = request.find(' ', path_start);
     std::string path = request.substr(path_start, path_end - path_start);
@@ -94,18 +96,25 @@ private:
 
     return server;
   }
+
+  std::function<void(int)> create_endpoint_handler(const std::string &responseText) {
+    return [responseText](int client_socket) {
+      std::string response = "HTTP/1.1 200 OK\r\nContent-Length: " +
+                             std::to_string(responseText.length()) + "\r\n\r\n" +
+                             responseText;
+
+      send(client_socket, response.c_str(), response.size(), 0);
+      close(client_socket);
+    };
+  }
 };
 
 int main() {
-    HttpHandler server(8080);
+  HttpHandler server(8080);
 
-    server.setEndpointHandler("/hello", [](int client_socket) {
-        const char* response = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello, World!";
-        send(client_socket, response, strlen(response), 0);
-        close(client_socket);
-    });
+  server.setEndpointHandler("/hello", "Hello World");
 
-    server.start();
+  server.start();
 
-    return 0;
+  return 0;
 }
