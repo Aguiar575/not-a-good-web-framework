@@ -17,13 +17,12 @@ public:
     endpointHandlers[path] = create_endpoint_handler(message);
   }
 
-  void start() {
-    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_socket == -1) {
-      perror("Error creating socket");
+  int start() {
+    int server_socket = create_socket();
+    if(server_socket == -1) {
+        return -1;
     }
-
-    sockaddr_in server_address = create_socket();
+    sockaddr_in server_address = create_address();
 
     if (bind(server_socket,
              reinterpret_cast<struct sockaddr *>(&server_address),
@@ -39,14 +38,22 @@ public:
 
     std::cout << "Server listening on port " << port << std::endl;
 
-    main_loop(server_socket);
+    while(true){
+        int client_socket = create_client(server_socket);
+        if(client_socket < 0) {
+            break;
+        }
+
+        handle(client_socket);
+    }
+
     close(server_socket);
+    return 0;
   }
 
 private:
   const int port;
   static const int BUFFER_SIZE = 1024;
-  int server_socket;
   std::unordered_map<std::string, std::function<void(int)>> endpointHandlers;
 
   void handle(int client_socket) {
@@ -75,20 +82,25 @@ private:
     }
   }
 
-  void main_loop(int server_socket) {
-    while (true) {
+  int create_client(int server_socket) {
       int client_socket = accept(server_socket, nullptr, nullptr);
       if (client_socket < 0) {
         perror("Error accepting connection");
-        continue;
       }
-
-      // Handle the incoming request in a new thread or process
-      handle(client_socket);
-    }
+        
+      return client_socket;
   }
 
-  sockaddr_in create_socket() {
+ int create_socket() {
+     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
+     if (server_socket == -1) {
+         perror("Error creating socket");
+    }
+
+    return server_socket;
+ }
+
+  sockaddr_in create_address() {
     sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
@@ -97,7 +109,7 @@ private:
     return server;
   }
 
-  std::function<void(int)> create_endpoint_handler(const std::string &responseText) {
+  std::function<void(int)> create_endpoint_handler(const std::string &responseText) const {
     return [responseText](int client_socket) {
       std::string response = "HTTP/1.1 200 OK\r\nContent-Length: " +
                              std::to_string(responseText.length()) + "\r\n\r\n" +
