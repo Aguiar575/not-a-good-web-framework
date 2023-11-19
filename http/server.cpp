@@ -1,26 +1,27 @@
+#include "httpStatus.h"
 #include <cstring>
 #include <functional>
 #include <iostream>
 #include <netinet/in.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <unordered_map>
-#include <stdio.h>
-#include <string.h>
 
 class HttpHandler {
 public:
   HttpHandler(int port) : port(port) {}
 
-  void setEndpointHandler(const std::string &path,
-                          const std::string &message) {
-    endpointHandlers[path] = create_endpoint_handler(message);
+  void setEndpointHandler(const std::string &path, const std::string &message,
+                          const std::string &status_code) {
+    endpointHandlers[path] = create_endpoint_handler(message, status_code);
   }
 
   int start() {
     int server_socket = create_socket();
-    if(server_socket == -1) {
-        return -1;
+    if (server_socket == -1) {
+      return -1;
     }
     sockaddr_in server_address = create_address();
 
@@ -38,13 +39,13 @@ public:
 
     std::cout << "Server listening on port " << port << std::endl;
 
-    while(true){
-        int client_socket = create_client(server_socket);
-        if(client_socket < 0) {
-            break;
-        }
+    while (true) {
+      int client_socket = create_client(server_socket);
+      if (client_socket < 0) {
+        break;
+      }
 
-        handle(client_socket);
+      handle(client_socket);
     }
 
     close(server_socket);
@@ -75,30 +76,31 @@ private:
     if (it != endpointHandlers.end()) {
       it->second(client_socket);
     } else {
-      const char *response =
-          "HTTP/1.1 404 Not Found\r\nContent-Length: 13\r\n\r\n404 Not Found";
-      send(client_socket, response, strlen(response), 0);
+        std::string response = "HTTP/1.1 " + HttpStatus::NOT_FOUND +
+                              "\r\nContent-Length: 13\r\n\r\n404 Not Found";
+                                 
+      send(client_socket, response.c_str(), response.size(), 0);
       close(client_socket);
     }
   }
 
   int create_client(int server_socket) {
-      int client_socket = accept(server_socket, nullptr, nullptr);
-      if (client_socket < 0) {
-        perror("Error accepting connection");
-      }
-        
-      return client_socket;
+    int client_socket = accept(server_socket, nullptr, nullptr);
+    if (client_socket < 0) {
+      perror("Error accepting connection");
+    }
+
+    return client_socket;
   }
 
- int create_socket() {
-     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
-     if (server_socket == -1) {
-         perror("Error creating socket");
+  int create_socket() {
+    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1) {
+      perror("Error creating socket");
     }
 
     return server_socket;
- }
+  }
 
   sockaddr_in create_address() {
     sockaddr_in server;
@@ -109,11 +111,13 @@ private:
     return server;
   }
 
-  std::function<void(int)> create_endpoint_handler(const std::string &responseText) const {
-    return [responseText](int client_socket) {
-      std::string response = "HTTP/1.1 200 OK\r\nContent-Length: " +
-                             std::to_string(responseText.length()) + "\r\n\r\n" +
-                             responseText;
+  std::function<void(int)>
+  create_endpoint_handler(const std::string &responseText,
+                          const std::string &statuscode) const {
+    return [responseText, statuscode](int client_socket) {
+      std::string response = "HTTP/1.1 " + statuscode + "\r\nContent-Length: " +
+                             std::to_string(responseText.length()) +
+                             "\r\n\r\n" + responseText;
 
       send(client_socket, response.c_str(), response.size(), 0);
       close(client_socket);
@@ -124,7 +128,7 @@ private:
 int main() {
   HttpHandler server(8080);
 
-  server.setEndpointHandler("/hello", "Hello World");
+  server.setEndpointHandler("/hello", "Hello World", HttpStatus::OK);
 
   server.start();
 
