@@ -112,12 +112,12 @@ private:
   }
 
   std::function<void(int)>
-  create_endpoint_handler(const std::string &responseText,
+  create_endpoint_handler(const std::string &response_text,
                           const std::string &statuscode) const {
-    return [responseText, statuscode](int client_socket) {
+    return [response_text, statuscode](int client_socket) {
       std::string response = "HTTP/1.1 " + statuscode + "\r\nContent-Length: " +
-                             std::to_string(responseText.length()) +
-                             "\r\n\r\n" + responseText;
+                             std::to_string(response_text.length()) +
+                             "\r\n\r\n" + response_text;
 
       send(client_socket, response.c_str(), response.size(), 0);
       close(client_socket);
