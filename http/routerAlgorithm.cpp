@@ -4,22 +4,14 @@
 #include <unordered_map>
 #include <vector>
 
-class TrieNode {
-public:
-  std::unordered_map<char, TrieNode *> children; // Children nodes
-  bool isEndOfWord; // Flag to mark the end of a word (path)
-  std::vector<std::pair<std::string, std::string>>
-      params; // Store parameters at each node
-
-  TrieNode() : isEndOfWord(false) {}
-};
+#include "pathStructure.h"
 
 class Trie {
 public:
-  Trie() { root = new TrieNode(); }
+  Trie() { root = new PathStructure(); }
 
   void insert(const std::string &path) {
-    TrieNode *node = root;
+    PathStructure *node = root;
     std::istringstream iss(path);
     std::string token;
 
@@ -42,7 +34,7 @@ public:
       } else {
         // Static segment, create a new node if not exists
         if (node->children.find(token[0]) == node->children.end()) {
-          node->children[token[0]] = new TrieNode();
+          node->children[token[0]] = new PathStructure();
         }
         node = node->children[token[0]];
       }
@@ -51,7 +43,7 @@ public:
   }
 
   bool search(const std::string &path) {
-    TrieNode *node = root;
+    PathStructure *node = root;
     std::istringstream iss(path);
     std::string token;
 
@@ -87,7 +79,7 @@ public:
   }
 
 private:
-  TrieNode *root;
+  PathStructure *root;
 
   bool validate_param_type(const std::string &value,
                          const std::string &expectedType) {

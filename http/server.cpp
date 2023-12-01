@@ -1,4 +1,3 @@
-#include "httpStatus.h"
 #include <cstring>
 #include <functional>
 #include <iostream>
@@ -8,6 +7,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <unordered_map>
+
+#include "httpStatus.h"
 
 class HttpHandler {
 public:
