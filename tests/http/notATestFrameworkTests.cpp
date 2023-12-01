@@ -2,26 +2,23 @@
 
 class NotATestFrameworkTests {
 public:
-    int add(int a, int b) {
-        return a + b;
-    }
+  int add(int a, int b) { return a + b; }
 };
 
 void testing_multiplication() {
-    NotATestFramework<NotATestFrameworkTests> tester;
+  NotATestFramework<NotATestFrameworkTests> tester;
 
-    tester.add_test_case([&tester]() {
-        NotATestFrameworkTests instance;
-        int result = instance.add(2, 3);
-        tester.assert(result == 5, "2 + 3 should be 5");
-    });
+  tester.add_test_case([&tester]() {
+    NotATestFrameworkTests instance;
+    int result = instance.add(2, 3);
+    tester.assert(result == 5, "2 + 3 should be 5");
+  });
 
-    tester.run_tests();
+  tester.run_tests();
 }
 
 int main() {
-    testing_multiplication();
+  testing_multiplication();
 
-    return 0;
+  return 0;
 }
-

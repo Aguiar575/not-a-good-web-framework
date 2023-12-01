@@ -9,4 +9,3 @@ public:
 
   PathStructure() : isEndOfWord(false) {}
 };
-

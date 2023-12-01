@@ -82,7 +82,7 @@ private:
   PathStructure *root;
 
   bool validate_param_type(const std::string &value,
-                         const std::string &expectedType) {
+                           const std::string &expectedType) {
     if (expectedType == "int") {
       for (char c : value) {
         if (!std::isdigit(c)) {

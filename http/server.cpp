@@ -77,9 +77,9 @@ private:
     if (it != endpointHandlers.end()) {
       it->second(client_socket);
     } else {
-        std::string response = "HTTP/1.1 " + HttpStatus::NOT_FOUND +
-                              "\r\nContent-Length: 13\r\n\r\n404 Not Found";
-                                 
+      std::string response = "HTTP/1.1 " + HttpStatus::NOT_FOUND +
+                             "\r\nContent-Length: 13\r\n\r\n404 Not Found";
+
       send(client_socket, response.c_str(), response.size(), 0);
       close(client_socket);
     }
