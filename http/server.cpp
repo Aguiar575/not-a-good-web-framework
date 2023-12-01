@@ -16,15 +16,15 @@ public:
 
   void setEndpointHandler(const std::string &path, const std::string &message,
                           const std::string &status_code) {
-    endpointHandlers[path] = create_endpoint_handler(message, status_code);
+    endpointHandlers[path] = createEndpointHandler(message, status_code);
   }
 
   int start() {
-    int server_socket = create_socket();
+    int server_socket = createSocket();
     if (server_socket == -1) {
       return -1;
     }
-    sockaddr_in server_address = create_address();
+    sockaddr_in server_address = createAddress();
 
     if (bind(server_socket,
              reinterpret_cast<struct sockaddr *>(&server_address),
@@ -41,7 +41,7 @@ public:
     std::cout << "Server listening on port " << port << std::endl;
 
     while (true) {
-      int client_socket = create_client(server_socket);
+      int client_socket = createClient(server_socket);
       if (client_socket < 0) {
         break;
       }
@@ -85,7 +85,7 @@ private:
     }
   }
 
-  int create_client(int server_socket) {
+  int createClient(int server_socket) {
     int client_socket = accept(server_socket, nullptr, nullptr);
     if (client_socket < 0) {
       perror("Error accepting connection");
@@ -94,7 +94,7 @@ private:
     return client_socket;
   }
 
-  int create_socket() {
+  int createSocket() {
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
       perror("Error creating socket");
@@ -103,7 +103,7 @@ private:
     return server_socket;
   }
 
-  sockaddr_in create_address() {
+  sockaddr_in createAddress() {
     sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
@@ -113,7 +113,7 @@ private:
   }
 
   std::function<void(int)>
-  create_endpoint_handler(const std::string &response_text,
+  createEndpointHandler(const std::string &response_text,
                           const std::string &statuscode) const {
     return [response_text, statuscode](int client_socket) {
       std::string response = "HTTP/1.1 " + statuscode + "\r\nContent-Length: " +

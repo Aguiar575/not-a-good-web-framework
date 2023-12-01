@@ -55,7 +55,7 @@ public:
         // Check for dynamic parameter
         bool foundParam = false;
         for (const auto &param : node->params) {
-          if (validate_param_type(token, param.second)) {
+          if (validateParamType(token, param.second)) {
             std::cout << "Parameter: " << param.first
                       << ", Type: " << param.second << ", Value: " << token
                       << "\n";
@@ -81,7 +81,7 @@ public:
 private:
   PathStructure *root;
 
-  bool validate_param_type(const std::string &value,
+  bool validateParamType(const std::string &value,
                            const std::string &expectedType) {
     if (expectedType == "int") {
       for (char c : value) {
