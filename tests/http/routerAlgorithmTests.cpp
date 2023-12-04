@@ -1,9 +1,9 @@
 
-#include "../notATestFramework.h"
+#include "../notATestFrameworkEngine.h"
 #include "../../http/routerAlgorithm.h"
 
 void HelloPathShouldBeFound() {
-  NotATestFramework<RouterAlgorithm> sut;
+  NotATestFrameworkEngine<RouterAlgorithm> sut;
 
   sut.addTestCase([&sut]() {
     RouterAlgorithm instance;

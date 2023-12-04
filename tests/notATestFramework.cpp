@@ -24,8 +24,9 @@ void processCppFile(const std::filesystem::path& filePath) {
 }
 
 int main() {
-    const std::filesystem::path testFolder = std::filesystem::current_path();
-
+    const std::filesystem::path currentPath = std::filesystem::current_path();
+    const std::filesystem::path testFolder = currentPath / "http";
+    
     for (const auto& entry : std::filesystem::directory_iterator(testFolder)) {
         if (entry.path().extension() == ".cpp") {
             std::cout << "Processing: " << entry.path().filename() << std::endl;

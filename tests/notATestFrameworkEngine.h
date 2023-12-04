@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 
-template <typename T> class NotATestFramework {
+template <typename T> class NotATestFrameworkEngine {
 public:
   void runTests();
 
@@ -17,6 +17,6 @@ private:
   std::vector<std::function<void()>> tests;
 };
 
-#include "notATestFramework.tpp"
+#include "notATestFrameworkEngine.h"
 
 #endif
