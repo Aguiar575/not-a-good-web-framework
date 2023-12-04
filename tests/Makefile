@@ -1,12 +1,12 @@
 CXX := g++
 CXXFLAGS := -std=c++11 -Wall
 TARGET := test_program
-SRCS := notATestFrameworkTests.cpp
+SRCS := http/notATestFrameworkTests.cpp
+
+MAKEFLAGS += --silent
 
 $(TARGET): $(SRCS)
 	$(CXX) $(CXXFLAGS) $^ -o $@
-
-.PHONY: clean
-clean:
+	./$(TARGET)
 	rm -f $(TARGET)
 

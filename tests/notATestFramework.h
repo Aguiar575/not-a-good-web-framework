@@ -7,14 +7,14 @@
 
 template <typename T> class NotATestFramework {
 public:
-  void run_tests();
+  void runTests();
 
   void assert(bool condition, const std::string &message);
 
-  void add_test_case(const std::function<void()> &testCase);
+  void addTestCase(const std::function<void()> &test);
 
 private:
-  std::vector<std::function<void()>> test_cases;
+  std::vector<std::function<void()>> tests;
 };
 
 #include "notATestFramework.tpp"

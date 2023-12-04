@@ -1,7 +1,7 @@
 template <typename T>
-void NotATestFramework<T>::run_tests() {
-  for (const auto &test_case : test_cases) {
-    test_case();
+void NotATestFramework<T>::runTests() {
+  for (const auto &test : tests) {
+    test();
   }
   std::cout << "Okay" << std::endl;
 }
@@ -14,6 +14,6 @@ void NotATestFramework<T>::assert(bool condition, const std::string &message) {
 }
 
 template <typename T>
-void NotATestFramework<T>::add_test_case(const std::function<void()> &test_case) {
-  test_cases.push_back(test_case);
+void NotATestFramework<T>::addTestCase(const std::function<void()> &test) {
+  tests.push_back(test);
 }

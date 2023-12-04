@@ -1,24 +1,25 @@
-#include "notATestFramework.h"
+#include "../notATestFramework.h"
 
 class NotATestFrameworkTests {
 public:
   int add(int a, int b) { return a + b; }
 };
 
-void testing_multiplication() {
-  NotATestFramework<NotATestFrameworkTests> tester;
+void twoPlusFiveShouldBeTrue() {
+  NotATestFramework<NotATestFrameworkTests> sut;
 
-  tester.add_test_case([&tester]() {
+  sut.addTestCase([&sut]() {
     NotATestFrameworkTests instance;
     int result = instance.add(2, 3);
-    tester.assert(result == 5, "2 + 3 should be 5");
+
+    sut.assert(result == 5, "2 + 3 should be 5");
   });
 
-  tester.run_tests();
+  sut.runTests();
 }
 
 int main() {
-  testing_multiplication();
+  twoPlusFiveShouldBeTrue();
 
   return 0;
 }
