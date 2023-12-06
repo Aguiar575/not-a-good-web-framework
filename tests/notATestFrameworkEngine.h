@@ -17,6 +17,6 @@ private:
   std::vector<std::function<void()>> tests;
 };
 
-#include "notATestFrameworkEngine.h"
+#include "notATestFrameworkEngine.tpp"
 
 #endif

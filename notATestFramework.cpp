@@ -6,7 +6,7 @@
 #include <string>
 #include <unordered_map>
 
-std::unordered_multimap<std::string, std::string> headerImplementationMap;
+std::unordered_multimap<std::string, std::string> testDependencies;
 const std::filesystem::path projectPath = std::filesystem::current_path();
 
 std::filesystem::path findFile(const std::filesystem::path &basePath,
@@ -30,7 +30,7 @@ void addFileToImplementationMap(std::filesystem::path &targetFile,
       findFile(projectPath, targetFile.filename());
   
   if (!targetFilePathCpp.empty()) {
-    headerImplementationMap.emplace(testFile, targetFilePathCpp.string());
+    testDependencies.emplace(testFile, targetFilePathCpp.string());
   }
 }
 
@@ -49,13 +49,13 @@ void processCppFile(const std::filesystem::path &filePath,
       targetFile = std::filesystem::weakly_canonical(targetFile);
 
       addFileToImplementationMap(targetFile, ".cpp", filePath);
-      addFileToImplementationMap(targetFile, ".tpp", filePath);
     }
   }
 }
 
 int main() {
   const std::filesystem::path testFolder = projectPath / "tests" / "http";
+  std::string testingFileUnderCompilation;
 
   for (const auto &entry : std::filesystem::directory_iterator(testFolder)) {
     if (entry.path().extension() == ".cpp") {
@@ -63,7 +63,7 @@ int main() {
     }
   }
 
-  for (const auto &pair : headerImplementationMap) {
+  for (const auto &pair : testDependencies) {
     std::cout << "Header: " << pair.first
               << " -> Implementation: " << pair.second << std::endl;
   }
