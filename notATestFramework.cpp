@@ -2,11 +2,14 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <list>
 #include <regex>
 #include <string>
-#include <unordered_map>
 
-std::unordered_multimap<std::string, std::string> testDependencies;
+std::list<std::string> testFileDependencies;
+std::list<std::filesystem::path> testFiles;
+
+const std::string compiler = "g++ -std=c++17 ";
 const std::filesystem::path projectPath = std::filesystem::current_path();
 
 std::filesystem::path findFile(const std::filesystem::path &basePath,
@@ -28,9 +31,9 @@ void addFileToImplementationMap(std::filesystem::path &targetFile,
   targetFile.replace_extension(fileExtension);
   std::filesystem::path targetFilePathCpp =
       findFile(projectPath, targetFile.filename());
-  
+
   if (!targetFilePathCpp.empty()) {
-    testDependencies.emplace(testFile, targetFilePathCpp.string());
+    testFileDependencies.emplace_back(targetFilePathCpp.string());
   }
 }
 
@@ -53,20 +56,38 @@ void processCppFile(const std::filesystem::path &filePath,
   }
 }
 
+std::string pushFilesToCommmand() {
+    std::string testCommand;
+
+    for(const auto &testFile : testFiles) {
+        testCommand += testFile.string() + " ";
+    }
+
+    for (const auto &dependencie : testFileDependencies) {
+        testCommand += dependencie + " ";
+    }
+
+    testCommand.insert(0, compiler);
+    testCommand += "-o testExecutable";
+
+    return testCommand;
+}
+
+
 int main() {
   const std::filesystem::path testFolder = projectPath / "tests" / "http";
-  std::string testingFileUnderCompilation;
 
   for (const auto &entry : std::filesystem::directory_iterator(testFolder)) {
     if (entry.path().extension() == ".cpp") {
-      processCppFile(entry.path(), projectPath);
+      testFiles.emplace_back(entry.path());
     }
   }
 
-  for (const auto &pair : testDependencies) {
-    std::cout << "Header: " << pair.first
-              << " -> Implementation: " << pair.second << std::endl;
+  for (const auto &testFile : testFiles) {
+    processCppFile(testFile, projectPath);
   }
+
+  std::cout << pushFilesToCommmand() << std::endl;
 
   return 0;
 }

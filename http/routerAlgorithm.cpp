@@ -1,4 +1,4 @@
-#include "RouterAlgorithm.h"
+#include "routerAlgorithm.h"
 
 RouterAlgorithm::RouterAlgorithm() {
   root = new PathStructure();
