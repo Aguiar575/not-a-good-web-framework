@@ -17,6 +17,22 @@ void HelloPathShouldBeFound() {
   sut.runTests();
 }
 
+void HellloPathShouldBeNotFound() {
+  NotATestFrameworkEngine<RouterAlgorithm> sut;
+
+  sut.addTestCase([&sut]() {
+    RouterAlgorithm instance;
+    instance.insert("/hello");
+
+    std::string searchPath = "/helllo";
+    int result = instance.search(searchPath);
+
+    sut.assert(result == false, "hello path should be not found");
+  });
+
+  sut.runTests();
+}
+
 int main() {
   HelloPathShouldBeFound();
 
