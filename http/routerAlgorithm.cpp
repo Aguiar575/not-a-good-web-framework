@@ -1,11 +1,6 @@
 #include "routerAlgorithm.h"
 
-RouterAlgorithm::RouterAlgorithm() {
-  root = new PathStructure();
-}
-
-void RouterAlgorithm::insert(const std::string &path) {
-  PathStructure *node = root;
+void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie){
   std::istringstream iss(path);
   std::string token;
 
@@ -18,26 +13,25 @@ void RouterAlgorithm::insert(const std::string &path) {
       size_t colonPos = token.find(':');
       if (colonPos != std::string::npos) {
         // Extract parameter name and type
-        node->params.push_back(
+        pathTrie->params.push_back(
             {token.substr(1, colonPos - 1),
              token.substr(colonPos + 1, token.length() - colonPos - 2)});
       } else {
         // Only parameter name specified without type
-        node->params.push_back({token.substr(1, token.length() - 2), ""});
+        pathTrie->params.push_back({token.substr(1, token.length() - 2), ""});
       }
     } else {
       // Static segment, create a new node if not exists
-      if (node->children.find(token[0]) == node->children.end()) {
-        node->children[token[0]] = new PathStructure();
+      if (pathTrie->children.find(token[0]) == pathTrie->children.end()) {
+        pathTrie->children[token[0]] = new PathStructure();
       }
-      node = node->children[token[0]];
+      pathTrie = pathTrie->children[token[0]];
     }
   }
-  node->isEndOfWord = true; // Mark the end of the path
+  pathTrie->isEndOfWord = true; // Mark the end of the path
 }
 
-bool RouterAlgorithm::search(const std::string &path) {
-  PathStructure *node = root;
+bool RouterAlgorithm::search(const std::string &path, PathStructure *pathTrie) {
   std::istringstream iss(path);
   std::string token;
 
@@ -45,10 +39,10 @@ bool RouterAlgorithm::search(const std::string &path) {
     if (token.empty())
       continue;
 
-    if (node->children.find(token[0]) == node->children.end()) {
+    if (pathTrie->children.find(token[0]) == pathTrie->children.end()) {
       // Check for dynamic parameter
       bool foundParam = false;
-      for (const auto &param : node->params) {
+      for (const auto &param : pathTrie->params) {
         if (validateParamType(token, param.second)) {
           std::cout << "Parameter: " << param.first
                     << ", Type: " << param.second << ", Value: " << token
@@ -61,11 +55,11 @@ bool RouterAlgorithm::search(const std::string &path) {
         return false;
       }
     } else {
-      node = node->children[token[0]];
+      pathTrie = pathTrie->children[token[0]];
     }
   }
 
-  if (node != nullptr && node->isEndOfWord) {
+  if (pathTrie != nullptr && pathTrie->isEndOfWord) {
     return true;
   } else {
     return false;

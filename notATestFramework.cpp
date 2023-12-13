@@ -67,7 +67,7 @@ getTestDependencies(const std::filesystem::path &filePath,
 std::string
 generateCompilationCommmand(const std::filesystem::path &testFileName,
                             std::list<std::string> &testFileDependencies) {
-  std::string compileCommand = testFileName;
+  std::string compileCommand = testFileName.string() + " ";
 
   for (const auto &dependencie : testFileDependencies) {
     compileCommand += dependencie + " ";
@@ -75,7 +75,7 @@ generateCompilationCommmand(const std::filesystem::path &testFileName,
 
   compileCommand.insert(0, compiler);
   compileCommand +=
-      "-o " + buildTestFolder.string() + "/" + testFileName.filename().string();
+      "-o " + buildTestFolder.string() + "/" + testFileName.filename().string() + " -v";
 
   return compileCommand;
 }
@@ -128,6 +128,8 @@ void processTestFolder(const std::filesystem::path &folderPath) {
 
       std::string command =
           generateCompilationCommmand(entry.path(), dependencies);
+
+     std::cout << command << std::endl;
 
       int compileResult = std::system(command.c_str());
       if (compileResult != 0) {

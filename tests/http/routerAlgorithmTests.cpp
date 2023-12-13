@@ -1,15 +1,17 @@
-#include "../notATestFrameworkEngine.h"
 #include "../../http/routerAlgorithm.h"
+#include "../notATestFrameworkEngine.h"
 
 void HelloPathShouldBeFound() {
+
+  PathStructure *node = new PathStructure();
   NotATestFrameworkEngine<RouterAlgorithm> sut;
 
-  sut.addTestCase([&sut]() {
+  sut.addTestCase([&sut, node]() {
     RouterAlgorithm instance;
-    instance.insert("/hello");
+    instance.insert("/hello", node);
 
     std::string searchPath = "/hello";
-    int result = instance.search(searchPath);
+    int result = instance.search(searchPath, node);
 
     sut.assert(result == true, "hello path should be found");
   });
@@ -17,15 +19,17 @@ void HelloPathShouldBeFound() {
   sut.runTests();
 }
 
-void HellloPathShouldBeNotFound() {
+void HelloPathShouldBeNotFound() {
+
+  PathStructure *node = new PathStructure();
   NotATestFrameworkEngine<RouterAlgorithm> sut;
 
-  sut.addTestCase([&sut]() {
+  sut.addTestCase([&sut, node]() {
     RouterAlgorithm instance;
-    instance.insert("/hello");
+    instance.insert("/hello", node);
 
-    std::string searchPath = "/helllo";
-    int result = instance.search(searchPath);
+    std::string searchPath = "lehho";
+    int result = instance.search(searchPath, node);
 
     sut.assert(result == false, "hello path should be not found");
   });
@@ -35,6 +39,7 @@ void HellloPathShouldBeNotFound() {
 
 int main() {
   HelloPathShouldBeFound();
+  HelloPathShouldBeNotFound();
 
   return 0;
 }

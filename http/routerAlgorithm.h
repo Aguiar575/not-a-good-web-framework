@@ -11,12 +11,10 @@
 
 class RouterAlgorithm {
 public:
-  RouterAlgorithm();
-  void insert(const std::string &path);
-  bool search(const std::string &path);
+  void insert(const std::string &path, PathStructure *pathTrie);
+  bool search(const std::string &path, PathStructure *pathTrie);
 
 private:
-  PathStructure *root;
   bool validateParamType(const std::string &value, const std::string &expectedType);
 };
 
