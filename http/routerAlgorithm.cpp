@@ -1,6 +1,6 @@
 #include "routerAlgorithm.h"
 
-void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie){
+void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie) {
   std::istringstream iss(path);
   std::string token;
 
@@ -44,9 +44,10 @@ bool RouterAlgorithm::search(const std::string &path, PathStructure *pathTrie) {
       bool foundParam = false;
       for (const auto &param : pathTrie->params) {
         if (validateParamType(token, param.second)) {
-          std::cout << "Parameter: " << param.first
-                    << ", Type: " << param.second << ", Value: " << token
-                    << "\n";
+          //          std::cout << "Parameter: " << param.first
+          //                    << ", Type: " << param.second << ", Value: " <<
+          //                    token
+          //                    << "\n";
           foundParam = true;
           break;
         }
@@ -67,7 +68,7 @@ bool RouterAlgorithm::search(const std::string &path, PathStructure *pathTrie) {
 }
 
 bool RouterAlgorithm::validateParamType(const std::string &value,
-                                         const std::string &expectedType) {
+                                        const std::string &expectedType) {
   if (expectedType == "int") {
     for (char c : value) {
       if (!std::isdigit(c)) {
@@ -80,4 +81,3 @@ bool RouterAlgorithm::validateParamType(const std::string &value,
   }
   return false;
 }
-

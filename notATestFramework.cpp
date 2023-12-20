@@ -75,7 +75,7 @@ generateCompilationCommmand(const std::filesystem::path &testFileName,
 
   compileCommand.insert(0, compiler);
   compileCommand +=
-      "-o " + buildTestFolder.string() + "/" + testFileName.filename().string() + " -v";
+      "-o " + buildTestFolder.string() + "/" + testFileName.filename().string();
 
   return compileCommand;
 }
@@ -129,8 +129,6 @@ void processTestFolder(const std::filesystem::path &folderPath) {
       std::string command =
           generateCompilationCommmand(entry.path(), dependencies);
 
-     std::cout << command << std::endl;
-
       int compileResult = std::system(command.c_str());
       if (compileResult != 0) {
         std::cerr << "Compilation failed." << std::endl;
@@ -146,7 +144,13 @@ void processTestFolder(const std::filesystem::path &folderPath) {
 int main() {
   std::filesystem::create_directories(buildTestFolder);
 
+  std::cout << "-----------------" << std::endl;
+  std::cout << "Running the tests" << std::endl;
+  std::cout << "-----------------" << std::endl;
+  
   processTestFolder(testFolder);
 
+  std::cout << "------ end ------" << std::endl;
+  
   return 0;
 }
