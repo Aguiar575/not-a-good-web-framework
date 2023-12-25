@@ -4,6 +4,7 @@
 #include <cctype>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -11,12 +12,13 @@
 
 class RouterAlgorithm {
 public:
-  void insert(const std::string &path, PathStructure *pathTrie);
-  bool search(const std::string &path, PathStructure *pathTrie);
+  void insert(const std::string &path, PathStructure *pathTrie,
+              const std::string &status);
+  PathStructure *search(const std::string &path, PathStructure *pathTrie);
 
 private:
-  bool validateParamType(const std::string &value, const std::string &expectedType);
+  bool validateParamType(const std::string &value,
+                         const std::string &expectedType);
 };
 
 #endif
-

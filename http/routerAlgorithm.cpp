@@ -1,6 +1,8 @@
 #include "routerAlgorithm.h"
+#include "httpStatus.h"
 
-void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie) {
+void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie, 
+        const std::string &status) {
   std::istringstream iss(path);
   std::string token;
 
@@ -23,15 +25,19 @@ void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie) {
     } else {
       // Static segment, create a new node if not exists
       if (pathTrie->children.find(token[0]) == pathTrie->children.end()) {
-        pathTrie->children[token[0]] = new PathStructure();
+        PathStructure *newNode = new PathStructure();
+        newNode->status = status;
+        pathTrie->children[token[0]] = newNode;
       }
       pathTrie = pathTrie->children[token[0]];
     }
   }
-  pathTrie->isEndOfWord = true; // Mark the end of the path
+
+  pathTrie->isEndOfWord = true;
 }
 
-bool RouterAlgorithm::search(const std::string &path, PathStructure *pathTrie) {
+PathStructure *RouterAlgorithm::search(const std::string &path,
+                                       PathStructure *pathTrie) {
   std::istringstream iss(path);
   std::string token;
 
@@ -53,7 +59,7 @@ bool RouterAlgorithm::search(const std::string &path, PathStructure *pathTrie) {
         }
       }
       if (!foundParam) {
-        return false;
+        return nullptr;
       }
     } else {
       pathTrie = pathTrie->children[token[0]];
@@ -61,9 +67,9 @@ bool RouterAlgorithm::search(const std::string &path, PathStructure *pathTrie) {
   }
 
   if (pathTrie != nullptr && pathTrie->isEndOfWord) {
-    return true;
+    return pathTrie;
   } else {
-    return false;
+    return nullptr;
   }
 }
 

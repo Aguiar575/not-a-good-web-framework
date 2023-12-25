@@ -1,12 +1,12 @@
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 class PathStructure {
 public:
-  std::unordered_map<char, PathStructure *> children; // Children nodes
-  bool isEndOfWord; // Flag to mark the end of a word (path)
-  std::vector<std::pair<std::string, std::string>>
-      params; // Store parameters at each node
+  std::unordered_map<char, PathStructure *> children;
+  bool isEndOfWord;
+  std::vector<std::pair<std::string, std::string>> params;
+  std::string status;
 
   PathStructure() : isEndOfWord(false) {}
 
