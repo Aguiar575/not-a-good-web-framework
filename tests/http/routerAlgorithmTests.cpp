@@ -1,49 +1,43 @@
+#include "../../http/httpStatus.h"
 #include "../../http/routerAlgorithm.h"
 #include "../notATestFrameworkEngine.h"
-#include "../../http/httpStatus.h"
 
-void HelloPathShouldBeFound(NotATestFrameworkEngine<RouterAlgorithm> &sut) {
-
-  PathStructure *node = new PathStructure();
-
+void HelloPathShouldBeFound(NotATestFrameworkEngine<RouterAlgorithm> &sut,
+                            PathStructure *node) {
   sut.addTestCase([&sut, node]() {
     RouterAlgorithm instance;
     instance.insert("/hello", node, HttpStatus::OK);
 
     std::string searchPath = "/hello";
-    PathStructure* result = instance.search(searchPath, node);
-        
+    PathStructure *result = instance.search(searchPath, node);
+
     sut.assert(result != nullptr, "hello path should be found");
     sut.assert(result->status == HttpStatus::OK, "status should be OK");
   });
 }
 
-void HelloPathShouldBeNotFound(NotATestFrameworkEngine<RouterAlgorithm> &sut) {
-
-  PathStructure *node = new PathStructure();
-
+void HelloPathShouldBeNotFound(NotATestFrameworkEngine<RouterAlgorithm> &sut,
+                               PathStructure *node) {
   sut.addTestCase([&sut, node]() {
     RouterAlgorithm instance;
     instance.insert("/hello", node, HttpStatus::NOT_FOUND);
 
     std::string searchPath = "lehho";
-    PathStructure* result = instance.search(searchPath, node);
+    PathStructure *result = instance.search(searchPath, node);
 
     sut.assert(result == nullptr, "lehho path should be not found");
   });
 }
 
 void UserWithStringPathParameterShouldBeFound(
-    NotATestFrameworkEngine<RouterAlgorithm> &sut) {
-
-  PathStructure *node = new PathStructure();
+    NotATestFrameworkEngine<RouterAlgorithm> &sut, PathStructure *node) {
 
   sut.addTestCase([&sut, node]() {
     RouterAlgorithm instance;
     instance.insert("/user/{name:string}", node, HttpStatus::OK);
 
     std::string searchPath = "user/john";
-    PathStructure* result = instance.search(searchPath, node);
+    PathStructure *result = instance.search(searchPath, node);
 
     sut.assert(result != nullptr, "john should be found");
     sut.assert(result->status == HttpStatus::OK, "status should be OK");
@@ -51,9 +45,7 @@ void UserWithStringPathParameterShouldBeFound(
 }
 
 void ThePathStructureShouldSupportMultiplePaths(
-    NotATestFrameworkEngine<RouterAlgorithm> &sut) {
-
-  PathStructure *node = new PathStructure();
+    NotATestFrameworkEngine<RouterAlgorithm> &sut, PathStructure *node) {
 
   sut.addTestCase([&sut, node]() {
     RouterAlgorithm instance;
@@ -61,7 +53,7 @@ void ThePathStructureShouldSupportMultiplePaths(
     instance.insert("/user/{age:int}", node, HttpStatus::OK);
 
     std::string nameSearchPath = "user/john";
-    PathStructure* result = instance.search(nameSearchPath, node);
+    PathStructure *result = instance.search(nameSearchPath, node);
     sut.assert(result != nullptr, "john should be found");
     sut.assert(result->status == HttpStatus::OK, "status should be OK");
 
@@ -74,12 +66,14 @@ void ThePathStructureShouldSupportMultiplePaths(
 
 int main() {
   NotATestFrameworkEngine<RouterAlgorithm> sut;
+  PathStructure *node = new PathStructure();
 
-  HelloPathShouldBeFound(sut);
-  HelloPathShouldBeNotFound(sut);
-  UserWithStringPathParameterShouldBeFound(sut);
-  ThePathStructureShouldSupportMultiplePaths(sut);
+  HelloPathShouldBeFound(sut, node);
+  HelloPathShouldBeNotFound(sut, node);
+  UserWithStringPathParameterShouldBeFound(sut, node);
+  ThePathStructureShouldSupportMultiplePaths(sut, node);
 
   sut.runTests();
+  delete node;
   return 0;
 }

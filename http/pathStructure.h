@@ -19,4 +19,11 @@ public:
   bool operator==(const PathStructure &other) const {
     return (isEndOfWord == other.isEndOfWord) && (params == other.params);
   }
+
+  void clean() {
+    children.clear();
+    isEndOfWord = false;
+    params.clear();
+    status.clear();
+  }
 };
