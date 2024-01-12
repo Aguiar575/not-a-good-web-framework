@@ -1,7 +1,11 @@
 template <typename T>
 void NotATestFrameworkEngine<T>::runTests() {
   for (const auto &test : tests) {
-    test();
+    try {
+      test();
+    } catch (const std::exception &e) {
+      std::cout << e.what() << std::endl;
+    }
   }
   std::cout << "Okay" << std::endl;
 }
@@ -9,7 +13,7 @@ void NotATestFrameworkEngine<T>::runTests() {
 template <typename T>
 void NotATestFrameworkEngine<T>::assert(bool condition, const std::string &message) {
   if (!condition) {
-    std::cout << "Failed: " << message << std::endl;
+    throw std::runtime_error("Test Failed: " + message);
   }
 }
 
