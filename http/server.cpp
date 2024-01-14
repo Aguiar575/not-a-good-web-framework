@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "httpStatus.h"
+#include "routerAlgorithm.h"
 
 class HttpHandler {
 public:
@@ -16,7 +17,8 @@ public:
 
   void setEndpointHandler(const std::string &path, const std::string &message,
                           const std::string &status_code) {
-    endpointHandlers[path] = createEndpointHandler(message, status_code);
+    //endpointHandlers[path] = createEndpointHandler(message, status_code);
+    router->insert(path, endpointHandlers, status_code);
   }
 
   int start() {
@@ -56,11 +58,13 @@ public:
 private:
   const int port;
   static const int BUFFER_SIZE = 1024;
-  std::unordered_map<std::string, std::function<void(int)>> endpointHandlers;
+  PathStructure *endpointHandlers = new PathStructure;
+  RouterAlgorithm *router = new RouterAlgorithm;
 
   void handle(int client_socket) {
     char buffer[BUFFER_SIZE] = {0};
     ssize_t bytes_received = recv(client_socket, buffer, BUFFER_SIZE, 0);
+    std::string response;
 
     if (bytes_received < 0) {
       perror("Error reading from socket");
@@ -73,16 +77,19 @@ private:
     size_t path_end = request.find(' ', path_start);
     std::string path = request.substr(path_start, path_end - path_start);
 
-    auto it = endpointHandlers.find(path);
-    if (it != endpointHandlers.end()) {
-      it->second(client_socket);
-    } else {
-      std::string response = "HTTP/1.1 " + HttpStatus::NOT_FOUND +
-                             "\r\nContent-Length: 13\r\n\r\n404 Not Found";
+    auto it = router->search(path, endpointHandlers);
 
-      send(client_socket, response.c_str(), response.size(), 0);
-      close(client_socket);
+    if (it == nullptr) {
+      response = "HTTP/1.1 " + HttpStatus::NOT_FOUND +
+                 "\r\nContent-Length: 13\r\n\r\n404 Not Found";
+
+    } else {
+      response = "HTTP/1.1 " + HttpStatus::OK +
+                 "\r\nContent-Length: 6\r\n\r\n200 OK";
     }
+
+    send(client_socket, response.c_str(), response.size(), 0);
+    close(client_socket);
   }
 
   int createClient(int server_socket) {
@@ -114,7 +121,7 @@ private:
 
   std::function<void(int)>
   createEndpointHandler(const std::string &response_text,
-                          const std::string &statuscode) const {
+                        const std::string &statuscode) const {
     return [response_text, statuscode](int client_socket) {
       std::string response = "HTTP/1.1 " + statuscode + "\r\nContent-Length: " +
                              std::to_string(response_text.length()) +
@@ -130,6 +137,7 @@ int main() {
   HttpHandler server(8080);
 
   server.setEndpointHandler("/hello", "Hello World", HttpStatus::OK);
+  server.setEndpointHandler("/user/{name:string}", "Hello World", HttpStatus::OK);
 
   server.start();
 
