@@ -1,10 +1,13 @@
 #include "routerAlgorithm.h"
 #include "httpStatus.h"
 
-void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie, 
-        const std::string &status) {
+void RouterAlgorithm::insert(
+    const std::string &path, PathStructure *pathTrie,
+    const std::pair<std::string, std::string> &status) {
+
   std::istringstream iss(path);
   std::string token;
+  std::vector<std::pair<std::string, std::string>> params;
 
   while (std::getline(iss, token, '/')) {
     if (token.empty())
@@ -15,7 +18,7 @@ void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie,
       size_t colonPos = token.find(':');
       if (colonPos != std::string::npos) {
         // Extract parameter name and type
-        pathTrie->params.push_back(
+        params.push_back(
             {token.substr(1, colonPos - 1),
              token.substr(colonPos + 1, token.length() - colonPos - 2)});
       } else {
@@ -26,13 +29,15 @@ void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie,
       // Static segment, create a new node if not exists
       if (pathTrie->children.find(token[0]) == pathTrie->children.end()) {
         PathStructure *newNode = new PathStructure();
-        newNode->status = status;
         pathTrie->children[token[0]] = newNode;
       }
       pathTrie = pathTrie->children[token[0]];
     }
   }
 
+  // Add the other parameters only in the end of the word
+  pathTrie->params = params;
+  pathTrie->status = status;
   pathTrie->isEndOfWord = true;
 }
 
@@ -46,19 +51,7 @@ PathStructure *RouterAlgorithm::search(const std::string &path,
       continue;
 
     if (pathTrie->children.find(token[0]) == pathTrie->children.end()) {
-      // Check for dynamic parameter
-      bool foundParam = false;
-      for (const auto &param : pathTrie->params) {
-        if (validateParamType(token, param.second)) {
-          //          std::cout << "Parameter: " << param.first
-          //                    << ", Type: " << param.second << ", Value: " <<
-          //                    token
-          //                    << "\n";
-          foundParam = true;
-          break;
-        }
-      }
-      if (!foundParam) {
+      if (!pathTrie->isEndOfWord) {
         return nullptr;
       }
     } else {

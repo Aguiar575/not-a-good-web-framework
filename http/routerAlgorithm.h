@@ -13,7 +13,7 @@
 class RouterAlgorithm {
 public:
   void insert(const std::string &path, PathStructure *pathTrie,
-              const std::string &status);
+              const std::pair<std::string, std::string> &status);
   PathStructure *search(const std::string &path, PathStructure *pathTrie);
 
 private:
