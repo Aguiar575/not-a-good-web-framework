@@ -4,9 +4,11 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <unordered_map>
+#include <utility>
 
 #include "httpStatus.h"
 #include "routerAlgorithm.h"
@@ -16,9 +18,8 @@ public:
   HttpHandler(int port) : port(port) {}
 
   void setEndpointHandler(const std::string &path, const std::string &message,
-                          const std::string &status_code) {
-    //endpointHandlers[path] = createEndpointHandler(message, status_code);
-    router->insert(path, endpointHandlers, status_code);
+                          std::pair<std::string, std::string> statusCode) {
+    router->insert(path, endpointHandlers, statusCode);
   }
 
   int start() {
@@ -136,8 +137,8 @@ private:
 int main() {
   HttpHandler server(8080);
 
-  server.setEndpointHandler("/hello", "Hello World", HttpStatus::OK);
-  server.setEndpointHandler("/user/{name:string}", "Hello World", HttpStatus::OK);
+  server.setEndpointHandler("/hello", "Hello World", HttpStatus::ok());
+  server.setEndpointHandler("/user/{name:string}", "Hello World", HttpStatus::ok());
 
   server.start();
 
