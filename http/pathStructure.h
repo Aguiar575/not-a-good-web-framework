@@ -8,14 +8,16 @@ public:
   bool isEndOfWord;
   std::vector<std::pair<std::string, std::string>> params;
   std::pair<std::string, std::string> status;
+  std::string message;
 
   PathStructure() : isEndOfWord(false) {}
 
   ~PathStructure() {
-      for (auto &child : children) {
-          delete child.second;
-      }
+    for (auto &child : children) {
+      delete child.second;
+    }
   }
+
   // Custom hash function for PathStructure
   size_t operator()(const PathStructure &path) const {
     return std::hash<bool>()(path.isEndOfWord) ^
@@ -25,7 +27,6 @@ public:
   bool operator==(const PathStructure &other) const {
     return (isEndOfWord == other.isEndOfWord) && (params == other.params);
   }
-
 
   void clean() {
     children.clear();

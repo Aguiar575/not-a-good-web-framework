@@ -127,9 +127,6 @@ private:
       std::string response = "HTTP/1.1 " + statuscode + "\r\nContent-Length: " +
                              std::to_string(response_text.length()) +
                              "\r\n\r\n" + response_text;
-
-      send(client_socket, response.c_str(), response.size(), 0);
-      close(client_socket);
     };
   }
 };

@@ -1,5 +1,6 @@
 #include "routerAlgorithm.h"
 #include "httpStatus.h"
+#include <string>
 
 void RouterAlgorithm::insert(
     const std::string &path, PathStructure *pathTrie,
@@ -39,6 +40,13 @@ void RouterAlgorithm::insert(
   pathTrie->params = params;
   pathTrie->status = status;
   pathTrie->isEndOfWord = true;
+}
+
+void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie,
+                             const std::pair<std::string, std::string> &status,
+                             std::string message) {
+  insert(path, pathTrie, status);
+  pathTrie->message = message;
 }
 
 PathStructure *RouterAlgorithm::search(const std::string &path,

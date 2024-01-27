@@ -17,6 +17,22 @@ void HelloPathShouldBeFound(NotATestFrameworkEngine<RouterAlgorithm> &sut,
   });
 }
 
+void FoundNodeShouldHaveReturnMessage(NotATestFrameworkEngine<RouterAlgorithm> &sut,
+                            PathStructure *node) {
+  sut.addTestCase([&sut, node]() {
+    RouterAlgorithm instance;
+    instance.insert("/hello", node, HttpStatus::ok(), "I'm falling in the sky");
+
+    std::string searchPath = "/hello";
+    PathStructure *result = instance.search(searchPath, node);
+
+    sut.assert(result != nullptr, "hello path should be found");
+    sut.assert(result->status.first == "200", "status should be OK");
+    sut.assert(result->message == "I'm falling in the sky", "Node should have a return message");
+  });
+}
+
+
 void HelloPathShouldBeNotFound(NotATestFrameworkEngine<RouterAlgorithm> &sut,
                                PathStructure *node) {
   sut.addTestCase([&sut, node]() {

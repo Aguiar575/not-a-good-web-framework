@@ -14,6 +14,9 @@ class RouterAlgorithm {
 public:
   void insert(const std::string &path, PathStructure *pathTrie,
               const std::pair<std::string, std::string> &status);
+  void insert(const std::string &path, PathStructure *pathTrie,
+              const std::pair<std::string, std::string> &status,
+              std::string message);
   PathStructure *search(const std::string &path, PathStructure *pathTrie);
 
 private:
