@@ -17,9 +17,14 @@ class HttpHandler {
 public:
   HttpHandler(int port) : port(port) {}
 
-  void setEndpointHandler(const std::string &path, const std::string &message,
+  void setEndpointHandler(const std::string &path,
                           std::pair<std::string, std::string> statusCode) {
     router->insert(path, endpointHandlers, statusCode);
+  }
+
+  void setEndpointHandler(const std::string &path, const std::string &message,
+                          std::pair<std::string, std::string> statusCode) {
+    router->insert(path, endpointHandlers, statusCode, message);
   }
 
   int start() {
@@ -78,15 +83,22 @@ private:
     size_t path_end = request.find(' ', path_start);
     std::string path = request.substr(path_start, path_end - path_start);
 
-    auto it = router->search(path, endpointHandlers);
+    auto foundNode = router->search(path, endpointHandlers);
 
-    if (it == nullptr) {
+    if (foundNode == nullptr) {
       response = "HTTP/1.1 " + HttpStatus::NOT_FOUND +
                  "\r\nContent-Length: 13\r\n\r\n404 Not Found";
 
+      send(client_socket, response.c_str(), response.size(), 0);
+      close(client_socket);
+    }
+
+    if (foundNode->message.empty()) {
+      response =
+          "HTTP/1.1 " + HttpStatus::OK + "\r\nContent-Length: 6\r\n\r\n200 OK";
     } else {
-      response = "HTTP/1.1 " + HttpStatus::OK +
-                 "\r\nContent-Length: 6\r\n\r\n200 OK";
+      response =
+          createEndpointHandler(foundNode->message, foundNode->status.first);
     }
 
     send(client_socket, response.c_str(), response.size(), 0);
@@ -120,14 +132,11 @@ private:
     return server;
   }
 
-  std::function<void(int)>
-  createEndpointHandler(const std::string &response_text,
-                        const std::string &statuscode) const {
-    return [response_text, statuscode](int client_socket) {
-      std::string response = "HTTP/1.1 " + statuscode + "\r\nContent-Length: " +
-                             std::to_string(response_text.length()) +
-                             "\r\n\r\n" + response_text;
-    };
+  std::string createEndpointHandler(const std::string &response_text,
+                                    const std::string &statuscode) const {
+    return  "HTTP/1.1 " + statuscode + "\r\nContent-Length: " +
+                           std::to_string(response_text.length()) + "\r\n\r\n" +
+                           response_text;
   }
 };
 
@@ -135,7 +144,8 @@ int main() {
   HttpHandler server(8080);
 
   server.setEndpointHandler("/hello", "Hello World", HttpStatus::ok());
-  server.setEndpointHandler("/user/{name:string}", "Hello World", HttpStatus::ok());
+  server.setEndpointHandler("/user/{name:string}", "Hello World",
+                            HttpStatus::ok());
 
   server.start();
 
