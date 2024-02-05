@@ -152,6 +152,13 @@ private:
       perror("Error creating socket");
     }
 
+    // Set the SO_REUSEADDR option on the socket. This allows the server to be
+    // restarted immediately after it is killed, without having to wait for the
+    // socket to be closed.
+    int optval = 1;
+    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval,
+               sizeof(int));
+
     return server_socket;
   }
 
@@ -166,9 +173,9 @@ private:
 
   std::string createEndpointHandler(const std::string &response_text,
                                     const std::string &statuscode) const {
-    return  "HTTP/1.1 " + statuscode + "\r\nContent-Length: " +
-                           std::to_string(response_text.length()) + "\r\n\r\n" +
-                           response_text;
+    return "HTTP/1.1 " + statuscode +
+           "\r\nContent-Length: " + std::to_string(response_text.length()) +
+           "\r\n\r\n" + response_text;
   }
 };
 
