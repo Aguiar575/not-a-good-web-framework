@@ -16,7 +16,6 @@
 class HttpHandler {
 public:
   HttpHandler(int port) : port(port) {}
-
   void setEndpointHandler(const std::string &path,
                           std::pair<std::string, std::string> statusCode) {
     router->insert(path, endpointHandlers, statusCode);
@@ -39,24 +38,47 @@ public:
              sizeof(server_address)) < 0) {
       perror("Error binding socket");
       close(server_socket);
+      return -1;
     }
 
     if (listen(server_socket, 5) < 0) {
       perror("Error listening");
       close(server_socket);
+      return -1;
     }
 
     std::cout << "Server listening on port " << port << std::endl;
 
-    while (true) {
-      int client_socket = createClient(server_socket);
-      if (client_socket < 0) {
+    fd_set read_fds;
+    int max_fd = server_socket;
+
+    while (isServerRunning) {
+      FD_ZERO(&read_fds);
+      FD_SET(server_socket, &read_fds);
+
+      int activity = select(max_fd + 1, &read_fds, nullptr, nullptr, nullptr);
+
+      if (activity < 0) {
+        perror("Error in select");
         break;
       }
 
-      handle(client_socket);
-    }
+      if (FD_ISSET(server_socket, &read_fds)) {
+        // Accept incoming connection
+        int client_socket = createClient(server_socket);
+        if (client_socket < 0) {
+          break;
+        }
 
+        // Handle the incoming request
+        handle(client_socket);
+
+        // Update max_fd if needed
+        if (client_socket > max_fd) {
+          max_fd = client_socket;
+        }
+      }
+    }
     close(server_socket);
     return 0;
   }
@@ -65,7 +87,11 @@ private:
   const int port;
   static const int BUFFER_SIZE = 1024;
   PathStructure *endpointHandlers = new PathStructure;
+  bool isServerRunning = true;
+
   RouterAlgorithm *router = new RouterAlgorithm;
+
+  void stopServer() { isServerRunning = false; }
 
   void handle(int client_socket) {
     char buffer[BUFFER_SIZE] = {0};
@@ -74,6 +100,7 @@ private:
 
     if (bytes_received < 0) {
       perror("Error reading from socket");
+      stopServer();
       return;
     }
 
@@ -86,9 +113,13 @@ private:
     auto foundNode = router->search(path, endpointHandlers);
 
     if (foundNode == nullptr) {
-      response = "HTTP/1.1 " + HttpStatus::NOT_FOUND +
-                 "\r\nContent-Length: 13\r\n\r\n404 Not Found";
-
+      if (path == "/favicon.ico") {
+        response =
+            "HTTP/1.1 " + HttpStatus::OK + "\r\nContent-Length: 0\r\n\r\n";
+      } else {
+        response = "HTTP/1.1 " + HttpStatus::NOT_FOUND +
+                   "\r\nContent-Length: 13\r\n\r\n404 Not Found";
+      }
       send(client_socket, response.c_str(), response.size(), 0);
       close(client_socket);
     }
@@ -109,6 +140,7 @@ private:
     int client_socket = accept(server_socket, nullptr, nullptr);
     if (client_socket < 0) {
       perror("Error accepting connection");
+      stopServer();
     }
 
     return client_socket;

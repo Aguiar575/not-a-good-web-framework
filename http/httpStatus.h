@@ -19,8 +19,6 @@ public:
 private:
   static const std::pair<std::string, std::string>
   makeStatusPair(std::string status, std::string message);
-
-  HttpStatus() = delete;
 };
 
 #endif // HTTPSTATUS_H
