@@ -94,6 +94,7 @@ private:
   void stopServer() { isServerRunning = false; }
 
   std::string handleFoundNode(PathStructure *foundNode) {
+    std::cout << foundNode->message << std::endl;
     if (foundNode->message.empty()) {
       return "HTTP/1.1 " + HttpStatus::OK +
              "\r\nContent-Length: 6\r\n\r\n200 OK";
@@ -102,7 +103,7 @@ private:
     }
   }
 
-PathStructure*  search_node(std::string buffer) {
+  PathStructure *search_node(std::string buffer) {
     std::string request(buffer);
 
     size_t path_start = request.find(' ') + 1;
@@ -111,8 +112,7 @@ PathStructure*  search_node(std::string buffer) {
 
     auto foundNode = router->search(path, endpointHandlers);
     return foundNode;
-}
-
+  }
 
   void handle(int client_socket) {
     char buffer[BUFFER_SIZE] = {0};
@@ -128,7 +128,8 @@ PathStructure*  search_node(std::string buffer) {
     auto foundNode = search_node(buffer);
 
     if (foundNode == nullptr) {
-      response = "HTTP/1.1 " + HttpStatus::NOT_FOUND + "\r\nContent-Length: 0\r\n\r\n";
+      response =
+          "HTTP/1.1 " + HttpStatus::NOT_FOUND + "\r\nContent-Length: 0\r\n\r\n";
     } else {
       response = handleFoundNode(foundNode);
     }
@@ -175,13 +176,17 @@ PathStructure*  search_node(std::string buffer) {
   std::string createEndpointHandler(const std::string &response_text,
                                     const std::string &statuscode) const {
     return "HTTP/1.1 " + statuscode +
-           "\r\nContent-Length: " + std::to_string(response_text.length()) +
-           "\r\n\r\n" + response_text;
+           "\r\nContent-Type: text/html\r\nContent-Length: " +
+           std::to_string(response_text.length()) + "\r\n\r\n" + response_text;
   }
 };
 
 int main() {
   HttpHandler server(8080);
+
+  server.setEndpointHandler("/html",
+                            "<html><body><h1>Hello, HTML!</h1></body></html>",
+                            HttpStatus::ok());
 
   server.setEndpointHandler("/hello", "Hello World", HttpStatus::ok());
   server.setEndpointHandler("/user/{name:string}", "Hello World",

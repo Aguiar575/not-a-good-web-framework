@@ -1,5 +1,5 @@
-CC = g++
-CFLAGS = -std=c++11
+CC = g++ -g
+CFLAGS = -std=c++17
 SRC_FILES = server.cpp httpStatus.cpp routerAlgorithm.cpp
 OUT = server
 

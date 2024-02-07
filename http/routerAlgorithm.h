@@ -7,16 +7,15 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <optional>
 
 #include "pathStructure.h"
 
 class RouterAlgorithm {
 public:
   void insert(const std::string &path, PathStructure *pathTrie,
-              const std::pair<std::string, std::string> &status);
-  void insert(const std::string &path, PathStructure *pathTrie,
-              const std::pair<std::string, std::string> &status,
-              std::string message);
+              const std::pair<std::string, std::string> &status, 
+              const std::optional<std::string> &message = std::nullopt);
   PathStructure *search(const std::string &path, PathStructure *pathTrie);
 
 private:

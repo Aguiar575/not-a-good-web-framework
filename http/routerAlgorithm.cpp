@@ -2,9 +2,9 @@
 #include "httpStatus.h"
 #include <string>
 
-void RouterAlgorithm::insert(
-    const std::string &path, PathStructure *pathTrie,
-    const std::pair<std::string, std::string> &status) {
+void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie,
+                             const std::pair<std::string, std::string> &status,
+                             const std::optional<std::string>& message) {
 
   std::istringstream iss(path);
   std::string token;
@@ -40,13 +40,9 @@ void RouterAlgorithm::insert(
   pathTrie->params = params;
   pathTrie->status = status;
   pathTrie->isEndOfWord = true;
-}
-
-void RouterAlgorithm::insert(const std::string &path, PathStructure *pathTrie,
-                             const std::pair<std::string, std::string> &status,
-                             std::string message) {
-  insert(path, pathTrie, status);
-  pathTrie->message = message;
+  if (message.has_value()) {
+    pathTrie->message = message.value();
+  }
 }
 
 PathStructure *RouterAlgorithm::search(const std::string &path,
