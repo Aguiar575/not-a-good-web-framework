@@ -93,6 +93,27 @@ private:
 
   void stopServer() { isServerRunning = false; }
 
+  std::string handleFoundNode(PathStructure *foundNode) {
+    if (foundNode->message.empty()) {
+      return "HTTP/1.1 " + HttpStatus::OK +
+             "\r\nContent-Length: 6\r\n\r\n200 OK";
+    } else {
+      return createEndpointHandler(foundNode->message, foundNode->status.first);
+    }
+  }
+
+PathStructure*  search_node(std::string buffer) {
+    std::string request(buffer);
+
+    size_t path_start = request.find(' ') + 1;
+    size_t path_end = request.find(' ', path_start);
+    std::string path = request.substr(path_start, path_end - path_start);
+
+    auto foundNode = router->search(path, endpointHandlers);
+    return foundNode;
+}
+
+
   void handle(int client_socket) {
     char buffer[BUFFER_SIZE] = {0};
     ssize_t bytes_received = recv(client_socket, buffer, BUFFER_SIZE, 0);
@@ -104,32 +125,12 @@ private:
       return;
     }
 
-    std::string request(buffer);
-
-    size_t path_start = request.find(' ') + 1;
-    size_t path_end = request.find(' ', path_start);
-    std::string path = request.substr(path_start, path_end - path_start);
-
-    auto foundNode = router->search(path, endpointHandlers);
+    auto foundNode = search_node(buffer);
 
     if (foundNode == nullptr) {
-      if (path == "/favicon.ico") {
-        response =
-            "HTTP/1.1 " + HttpStatus::OK + "\r\nContent-Length: 0\r\n\r\n";
-      } else {
-        response = "HTTP/1.1 " + HttpStatus::NOT_FOUND +
-                   "\r\nContent-Length: 13\r\n\r\n404 Not Found";
-      }
-      send(client_socket, response.c_str(), response.size(), 0);
-      close(client_socket);
-    }
-
-    if (foundNode->message.empty()) {
-      response =
-          "HTTP/1.1 " + HttpStatus::OK + "\r\nContent-Length: 6\r\n\r\n200 OK";
+      response = "HTTP/1.1 " + HttpStatus::NOT_FOUND + "\r\nContent-Length: 0\r\n\r\n";
     } else {
-      response =
-          createEndpointHandler(foundNode->message, foundNode->status.first);
+      response = handleFoundNode(foundNode);
     }
 
     send(client_socket, response.c_str(), response.size(), 0);
